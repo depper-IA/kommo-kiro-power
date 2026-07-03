@@ -31,13 +31,13 @@ Connect AI agents to your **Kommo CRM** (formerly amoCRM) using the [Model Conte
 
 1. Open Kiro → Powers panel → **Add Custom Power**
 2. Select **Import power from GitHub**
-3. Paste: `https://github.com/wilkieraw/kommo-kiro-power`
+3. Paste: `https://github.com/depper-IA/kommo-kiro-power`
 4. Follow the onboarding steps when activated
 
 ### Install as standalone MCP
 
 ```bash
-git clone https://github.com/wilkieraw/kommo-kiro-power.git
+git clone https://github.com/depper-IA/kommo-kiro-power.git
 cd kommo-kiro-power
 pip install -e .
 ```

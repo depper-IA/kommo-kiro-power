@@ -9,7 +9,7 @@ description = "MCP server for Kommo CRM — Connect AI agents to your Kommo acco
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "wilkieraw" }]
+authors = [{ name = "depper-IA" }]
 keywords = ["kommo", "crm", "mcp", "model-context-protocol", "kiro", "ai-agent"]
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -30,9 +30,9 @@ dev = ["pytest", "pytest-asyncio", "ruff"]
 kommo-mcp = "kommo_mcp.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/wilkieraw/kommo-kiro-power"
-Repository = "https://github.com/wilkieraw/kommo-kiro-power"
-Issues = "https://github.com/wilkieraw/kommo-kiro-power/issues"
+Homepage = "https://github.com/depper-IA/kommo-kiro-power"
+Repository = "https://github.com/depper-IA/kommo-kiro-power"
+Issues = "https://github.com/depper-IA/kommo-kiro-power/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]

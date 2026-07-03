@@ -3,7 +3,7 @@ name: "kommo-crm"
 displayName: "Kommo CRM"
 description: "Manage leads, contacts, pipelines, tasks, notes, tags, and companies in Kommo CRM directly from your IDE using natural language"
 keywords: ["kommo", "crm", "leads", "contacts", "pipelines", "sales", "amocrm", "tasks", "deals", "companies", "chat", "custom-fields", "notes"]
-author: "wilkieraw"
+author: "depper-IA"
 version: "1.0.0"
 ---
 
@@ -32,7 +32,7 @@ pip install kommo-kiro-power
 Or install from source:
 
 ```bash
-git clone https://github.com/wilkieraw/kommo-kiro-power.git
+git clone https://github.com/depper-IA/kommo-kiro-power.git
 cd kommo-kiro-power
 pip install -e .
 ```
