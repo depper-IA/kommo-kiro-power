@@ -92,3 +92,10 @@ A browser window will open. Sign in to Kommo and authorize the application. Toke
 - Tags are resolved by name — if a tag doesn't exist, it will be created automatically
 - The server rate-limits to 5 requests/second to respect Kommo's API limits
 - Tokens refresh automatically — no manual intervention needed after initial OAuth setup
+
+## License and support
+
+This power uses the Kommo MCP Server (MIT).
+
+- [Privacy Policy](https://www.kommo.com/privacy-policy/)
+- [Support](https://github.com/depper-IA/kommo-kiro-power/issues)
