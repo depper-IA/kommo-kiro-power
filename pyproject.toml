@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kommo-kiro-power"
+version = "1.0.0"
+description = "MCP server for Kommo CRM — Connect AI agents to your Kommo account"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "wilkieraw" }]
+keywords = ["kommo", "crm", "mcp", "model-context-protocol", "kiro", "ai-agent"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+dependencies = ["mcp>=1.0.0", "httpx>=0.27.0", "python-dotenv>=1.0.0"]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "ruff"]
+
+[project.scripts]
+kommo-mcp = "kommo_mcp.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/wilkieraw/kommo-kiro-power"
+Repository = "https://github.com/wilkieraw/kommo-kiro-power"
+Issues = "https://github.com/wilkieraw/kommo-kiro-power/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["kommo_mcp*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]

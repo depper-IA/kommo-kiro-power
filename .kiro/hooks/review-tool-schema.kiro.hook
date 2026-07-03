@@ -1,0 +1,13 @@
+{
+  "name": "Review MCP Tool Schema",
+  "version": "1.0.0",
+  "description": "When tool definition files are edited, verify inputSchema matches the handler implementation",
+  "when": {
+    "type": "fileEdited",
+    "patterns": ["kommo_mcp/tools/*.py"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A tool definition file was edited. Verify: (1) every tool in get_*_tools() has a matching handler in handle_*_tool(), (2) inputSchema required fields match the handler's parameter usage, (3) descriptions are clear and in English for the public API."
+  }
+}

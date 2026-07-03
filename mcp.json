@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "kommo": {
+      "command": "python",
+      "args": ["-m", "kommo_mcp"],
+      "env": {
+        "KOMMO_CLIENT_ID": "${KOMMO_CLIENT_ID}",
+        "KOMMO_CLIENT_SECRET": "${KOMMO_CLIENT_SECRET}",
+        "KOMMO_SUBDOMAIN": "${KOMMO_SUBDOMAIN}",
+        "KOMMO_REDIRECT_URI": "${KOMMO_REDIRECT_URI}"
+      }
+    }
+  }
+}

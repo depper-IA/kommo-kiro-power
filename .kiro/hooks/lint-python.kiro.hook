@@ -1,0 +1,13 @@
+{
+  "name": "Lint Python on Save",
+  "version": "1.0.0",
+  "description": "Run ruff linter on Python files when saved to catch style and type issues early",
+  "when": {
+    "type": "fileEdited",
+    "patterns": ["**/*.py"]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "python -m ruff check --fix ."
+  }
+}

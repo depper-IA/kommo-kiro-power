@@ -1,0 +1,13 @@
+{
+  "name": "Validate POWER.md Structure",
+  "version": "1.0.0",
+  "description": "When POWER.md is edited, remind the agent to verify frontmatter keywords and steering file references are consistent",
+  "when": {
+    "type": "fileEdited",
+    "patterns": ["POWER.md"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "POWER.md was edited. Verify: (1) frontmatter keywords match actual tool capabilities, (2) steering file references in 'When to Load' section match files in steering/ directory, (3) onboarding steps are complete and accurate."
+  }
+}
