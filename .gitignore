@@ -15,6 +15,13 @@ build/
 .vscode/
 .idea/
 
+# Kiro/ATL (local dev only)
+.kiro/
+.atl/
+
+# Docs (not part of the power)
+docs/
+
 # OS
 .DS_Store
 Thumbs.db

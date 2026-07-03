@@ -2,7 +2,7 @@
 name: "kommo-crm"
 displayName: "Kommo CRM"
 description: "Manage leads, contacts, pipelines, tasks, notes, tags, and companies in Kommo CRM directly from your IDE using natural language"
-keywords: ["kommo", "crm", "leads", "contacts", "pipelines", "sales", "amocrm", "tasks", "deals", "companies", "chat", "custom-fields", "notes"]
+keywords: ["kommo", "crm", "leads", "contacts", "pipelines", "sales", "amocrm", "tasks", "deals", "companies", "chat", "custom-fields", "notes", "tags"]
 author: "depper-IA"
 version: "1.0.0"
 ---
