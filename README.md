@@ -1,5 +1,7 @@
 # kommo-kiro-power — Kommo CRM Power for Kiro
 
+<!-- mcp-name: io.github.depper-IA/kommo-kiro-power -->
+
 <p align="center">
   <img src="https://img.shields.io/badge/Kiro-Power-blue" alt="Kiro Power" />
   <img src="https://img.shields.io/badge/MCP-Compatible-green" alt="MCP Compatible" />
