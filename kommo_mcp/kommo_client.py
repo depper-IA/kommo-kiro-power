@@ -328,6 +328,20 @@ class KommoClient:
         payload = [{"id": u["id"], **u.get("fields", {})} for u in leads_updates]
         return await self.patch("/leads", json=payload)
 
+    @staticmethod
+    def _phone_email_fields(phone: str | None, email: str | None) -> list[dict[str, Any]]:
+        """Build PHONE/EMAIL values addressed by system field_code (no field_id lookup)."""
+        fields: list[dict[str, Any]] = []
+        if phone:
+            fields.append(
+                {"field_code": "PHONE", "values": [{"value": phone, "enum_code": "WORK"}]}
+            )
+        if email:
+            fields.append(
+                {"field_code": "EMAIL", "values": [{"value": email, "enum_code": "WORK"}]}
+            )
+        return fields
+
     # --- Contacts ---
 
     async def list_contacts(
@@ -351,24 +365,11 @@ class KommoClient:
         email: str | None = None,
         custom_fields: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
-        """Create contact with automatic phone/email field resolution."""
+        """Create a contact; phone/email go in as the PHONE/EMAIL system fields."""
         payload: dict[str, Any] = {"name": name}
         cfv = list(custom_fields) if custom_fields else []
 
-        if phone or email:
-            fields = await self.list_custom_fields("contacts")
-            field_map = {f["name"].upper(): f["id"] for f in fields}
-            field_code_map = {f.get("code", "").upper(): f["id"] for f in fields}
-
-            if phone:
-                fid = field_map.get("PHONE") or field_code_map.get("PHONE")
-                if fid:
-                    cfv.append({"field_id": fid, "values": [{"value": phone, "enum_code": "WORK"}]})
-
-            if email:
-                fid = field_map.get("EMAIL") or field_code_map.get("EMAIL")
-                if fid:
-                    cfv.append({"field_id": fid, "values": [{"value": email, "enum_code": "WORK"}]})
+        cfv.extend(self._phone_email_fields(phone, email))
 
         if cfv:
             payload["custom_fields_values"] = cfv
@@ -589,24 +590,9 @@ class KommoClient:
 
         if contact_name:
             contact: dict[str, Any] = {"name": contact_name}
-            if contact_phone or contact_email:
-                contact["custom_fields_values"] = []
-                fields = await self.list_custom_fields("contacts")
-                field_map = {f["name"].upper(): f["id"] for f in fields}
-                field_code_map = {f.get("code", "").upper(): f["id"] for f in fields}
-
-                if contact_phone:
-                    fid = field_map.get("PHONE") or field_code_map.get("PHONE")
-                    if fid:
-                        contact["custom_fields_values"].append(
-                            {"field_id": fid, "values": [{"value": contact_phone}]}
-                        )
-                if contact_email:
-                    fid = field_map.get("EMAIL") or field_code_map.get("EMAIL")
-                    if fid:
-                        contact["custom_fields_values"].append(
-                            {"field_id": fid, "values": [{"value": contact_email}]}
-                        )
+            contact_fields = self._phone_email_fields(contact_phone, contact_email)
+            if contact_fields:
+                contact["custom_fields_values"] = contact_fields
             payload["_embedded"] = payload.get("_embedded", {})
             payload["_embedded"]["contacts"] = [contact]
 

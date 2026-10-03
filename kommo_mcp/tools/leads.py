@@ -282,9 +282,9 @@ def get_lead_tools() -> list[types.Tool]:
             description=(
                 "Create a lead together with a new contact and/or company in one request "
                 "(POST /leads/complex). Not idempotent: always creates new records, never links "
-                "existing ones. Returns the created lead. Phone and email are stored only if the "
-                "account has contact fields named or coded PHONE and EMAIL. Use create_lead if no "
-                "contact or company is needed."
+                "existing ones. Returns the created lead. Contact phone and email are sent as Kommo's "
+                "built-in PHONE and EMAIL fields. Use create_lead if no contact or company is "
+                "needed."
             ),
             inputSchema={
                 "type": "object",
