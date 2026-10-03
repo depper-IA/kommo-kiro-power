@@ -21,7 +21,12 @@
     "entry_point": "src/server.py",
     "mcp_config": {
       "command": "uv",
-      "args": ["run", "--directory", "${__dirname}", "src/server.py"],
+      "args": [
+        "run",
+        "--directory",
+        "${__dirname}",
+        "src/server.py"
+      ],
       "env": {
         "KOMMO_SUBDOMAIN": "${user_config.subdomain}",
         "KOMMO_ACCESS_TOKEN": "${user_config.access_token}",
@@ -70,12 +75,147 @@
     }
   },
   "compatibility": {
-    "platforms": ["darwin", "linux", "win32"],
+    "platforms": [
+      "darwin",
+      "linux",
+      "win32"
+    ],
     "runtimes": {
       "python": ">=3.10"
     }
   },
-  "keywords": ["kommo", "crm", "leads", "sales", "pipelines", "amocrm"],
+  "keywords": [
+    "kommo",
+    "crm",
+    "leads",
+    "sales",
+    "pipelines",
+    "amocrm"
+  ],
   "license": "MIT",
-  "privacy_policies": ["https://github.com/depper-IA/kommo-kiro-power/blob/main/PRIVACY.md"]
+  "privacy_policies": [
+    "https://github.com/depper-IA/kommo-kiro-power/blob/main/PRIVACY.md"
+  ],
+  "tools": [
+    {
+      "name": "list_leads",
+      "description": "List leads, optionally filtered by pipeline and stage. Read-only. Returns an array of lead objects with embedded contacts and tags, up to `limit` items (follows Kommo pagination when limit exceeds 50). To fetch custom fields for one lead, use get_lead."
+    },
+    {
+      "name": "get_lead",
+      "description": "Fetch one lead by ID. Read-only. Returns the full lead object including embedded contacts, tags, and custom_fields_values. Use list_leads instead to browse or find lead IDs."
+    },
+    {
+      "name": "create_lead",
+      "description": "Create one lead in Kommo. Not idempotent: each call creates a new lead. Tag names that do not exist yet are created automatically. Returns the created lead object. To create the contact and company in the same call, use create_lead_complex."
+    },
+    {
+      "name": "update_lead",
+      "description": "Update fields on an existing lead by sending `fields` as the body of a Kommo API v4 PATCH /leads/{id}. Returns the updated lead. Overwrites the given values; omitted fields are untouched. For a stage change prefer move_lead_stage; for several leads use bulk_update_leads."
+    },
+    {
+      "name": "delete_lead",
+      "description": "Delete a lead. Sends PATCH /leads/{id} with is_deleted=true, so the lead is soft-deleted rather than removed through a hard-delete call. Destructive: the lead disappears from normal lists. Confirm the lead_id with get_lead first."
+    },
+    {
+      "name": "move_lead_stage",
+      "description": "Move a lead to another stage by setting its status_id (and optionally pipeline_id). Returns the updated lead. Use this instead of update_lead for pipeline moves. Pass pipeline_id when moving to a stage in a different pipeline."
+    },
+    {
+      "name": "bulk_update_leads",
+      "description": "Update many leads in a single PATCH /leads request. Each item merges its `fields` with the lead `id` and uses the same field keys as update_lead. Returns the Kommo response for the batch. Use update_lead for a single lead."
+    },
+    {
+      "name": "create_lead_complex",
+      "description": "Create a lead together with a new contact and/or company in one request (POST /leads/complex). Not idempotent: always creates new records, never links existing ones. Returns the created lead. Contact phone and email are sent as Kommo's built-in PHONE and EMAIL fields. Use create_lead if no contact or company is needed."
+    },
+    {
+      "name": "add_tag",
+      "description": "Attach a tag to a lead by name. Creates the tag if it does not exist. Reads the lead's current tags and writes back the full list plus the new one, so existing tags are kept. Safe to repeat. Returns the updated lead. See list_tags for existing tag names."
+    },
+    {
+      "name": "remove_tag",
+      "description": "Detach a tag from a lead by name. Reads the lead's tags and writes back the list without that tag; other tags are kept. The tag itself is not deleted from the account. If no tag with that name exists, nothing changes and the lead is returned as is. Safe to repeat. Returns the updated lead."
+    },
+    {
+      "name": "list_tags",
+      "description": "List tags defined in the account for one entity type (up to 250). Read-only. Returns tag objects with id and name. Use it to check exact tag names before add_tag or remove_tag."
+    },
+    {
+      "name": "create_task",
+      "description": "Create a follow-up task (type 1) attached to a lead. Not idempotent: each call creates a new task. Returns the created task. Use list_tasks to review existing tasks and add_note for non-actionable remarks."
+    },
+    {
+      "name": "list_tasks",
+      "description": "List tasks, optionally for one lead or only overdue ones. Read-only. Returns an array (Kommo default page size unless `limit` is set, max 250); pass `page` for paginated output with a has_next flag. Overdue means deadline at or before now and not completed."
+    },
+    {
+      "name": "add_note",
+      "description": "Add a plain text (common) note to a lead's timeline. Not idempotent: repeated calls add duplicate notes. Notes are internal and are not sent to the customer; use send_chat_message for that. Returns the created note."
+    },
+    {
+      "name": "send_chat_message",
+      "description": "Send an outgoing chat message to the customer in a lead's conversation. Finds the first conversation (talk) linked to the lead and posts to it; fails with an error if the lead has none. The message is delivered externally and cannot be recalled by this server, and repeated calls send duplicates. Use add_note for internal notes."
+    },
+    {
+      "name": "list_chat_templates",
+      "description": "List the account's chat message templates. Read-only. Returns template objects as provided by Kommo. This server cannot send a template; it only lists them (send_chat_message sends plain text)."
+    },
+    {
+      "name": "list_contacts",
+      "description": "Search or list contacts. Read-only. Returns an array of up to `limit` contacts (max 250); pass `page` for paginated output with a has_next flag. Pass `query` to match by name, phone, or email; omit it to list recent contacts. Use get_contact for one contact's full details."
+    },
+    {
+      "name": "get_contact",
+      "description": "Fetch one contact by ID. Read-only. Returns the contact with embedded tags and custom_fields_values (phone, email, and others). Use list_contacts to find the ID."
+    },
+    {
+      "name": "create_contact",
+      "description": "Create one contact. Not idempotent: it does not check for duplicates, so search with list_contacts first. Phone and email are sent as Kommo's built-in PHONE and EMAIL fields (WORK values). Returns the created contact. To create a lead and contact together, use create_lead_complex."
+    },
+    {
+      "name": "update_contact",
+      "description": "Update fields on an existing contact by sending `fields` as the body of a Kommo API v4 PATCH /contacts/{id}. Returns the updated contact. Provided values overwrite existing ones; omitted fields are untouched."
+    },
+    {
+      "name": "list_pipelines",
+      "description": "List all sales pipelines in the account. Read-only. Returns pipeline objects (id, name, sort, embedded stages as provided by Kommo). Results are cached for 10 minutes, so very recent changes may not show. Start here to obtain the pipeline_id and stage IDs used by most lead tools."
+    },
+    {
+      "name": "create_pipeline",
+      "description": "Create a new sales pipeline with the given name (sort order 99). Not idempotent: each call creates another pipeline. Returns the created pipeline. Add stages afterwards with create_stage. Clears the pipelines cache."
+    },
+    {
+      "name": "update_pipeline",
+      "description": "Rename an existing pipeline. Only the name can be changed with this tool. Returns the updated pipeline. Safe to repeat. Clears the pipelines cache. To change a stage use update_stage."
+    },
+    {
+      "name": "list_stages",
+      "description": "List the stages (statuses) of one pipeline. Read-only. Returns stage objects with id, name, sort, color, and is_editable. Results are cached for 10 minutes. Use the stage IDs with list_leads, create_lead, and move_lead_stage."
+    },
+    {
+      "name": "create_stage",
+      "description": "Add a stage to a pipeline. It is placed after the pipeline's existing editable stages (sort is computed automatically). Not idempotent: each call creates another stage. Returns the created stage. Clears the stage and pipeline caches."
+    },
+    {
+      "name": "update_stage",
+      "description": "Change a stage's name, sort order, or color. Only the provided fields are sent; supply at least one of name, sort, or color. Returns the updated stage. Safe to repeat. Clears the stage and pipeline caches. Get IDs from list_stages."
+    },
+    {
+      "name": "list_custom_fields",
+      "description": "List custom field definitions for leads, contacts, or companies. Read-only. Returns field objects with id, name, code, type, and enum options. Cached for 1 hour. Use the field IDs in custom_fields_values when calling update_lead or update_contact."
+    },
+    {
+      "name": "create_custom_field",
+      "description": "Create a custom field on leads, contacts, or companies. Not idempotent: each call creates another field, so check list_custom_fields first. Returns the created field. Clears the custom-field cache for that entity. Provide enum_values for select-type fields."
+    },
+    {
+      "name": "create_company",
+      "description": "Create a company record with a name only. Not idempotent: duplicates are not checked, so look with list_companies first. Returns the created company. To create a company alongside a new lead, use create_lead_complex."
+    },
+    {
+      "name": "list_companies",
+      "description": "List companies. Read-only. Returns an array of up to `limit` companies (max 250); pass `page` for paginated output with a has_next flag. No name search."
+    }
+  ]
 }

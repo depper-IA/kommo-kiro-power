@@ -48,7 +48,7 @@ Published on [PyPI](https://pypi.org/project/kommo-kiro-power/) and the [officia
 uvx --from kommo-kiro-power kommo-mcp
 ```
 
-Or install the one-click [MCPB bundle](https://github.com/depper-IA/kommo-kiro-power/releases/latest) (`kommo-crm.mcpb`) in Claude Desktop or any MCPB-compatible client. Bundle sources live in `mcpb/`; rebuild with `pnpm dlx @anthropic-ai/mcpb pack mcpb kommo-crm.mcpb`.
+Or install the one-click [MCPB bundle](https://github.com/depper-IA/kommo-kiro-power/releases/latest) (`kommo-crm.mcpb`) in Claude Desktop or any MCPB-compatible client. Bundle sources live in `mcpb/`. After changing tools, run `python scripts/build_mcpb.py` to sync the manifest, then `pnpm dlx @anthropic-ai/mcpb pack mcpb kommo-crm.mcpb`. For Smithery, `python scripts/build_mcpb.py --smithery kommo-crm-smithery.mcpb` builds a variant that also carries each tool's `inputSchema`.
 
 Or from source:
 
