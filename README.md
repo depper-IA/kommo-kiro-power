@@ -7,6 +7,10 @@
   <img src="https://img.shields.io/badge/License-MIT-lightgrey" alt="MIT License" />
 </p>
 
+<p align="center">
+  <a href="https://glama.ai/mcp/servers/depper-IA/kommo-kiro-power"><img width="380" src="https://glama.ai/mcp/servers/depper-IA/kommo-kiro-power/badges/card.svg" alt="Kommo Kiro MCP server - quality and maintenance score on Glama" /></a>
+</p>
+
 Connect AI agents to your **Kommo CRM** (formerly amoCRM) using the [Model Context Protocol](https://modelcontextprotocol.io). Manage leads, contacts, pipelines, tasks, notes, tags, and companies — all from natural language in [Kiro](https://kiro.dev) or any MCP-compatible client.
 
 ## Features
