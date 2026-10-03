@@ -66,6 +66,9 @@ def cache_invalidate(*keys: str) -> None:
         _cache.pop(key, None)
 
 
+MAX_PAGE_LIMIT = 250  # Kommo v4 list endpoints: limit max 250
+
+
 class KommoClient:
     """
     HTTP client for Kommo CRM API v4.
@@ -240,6 +243,37 @@ class KommoClient:
             self._tags_cache[tag_name] = tag_id
         return tag_id
 
+    async def _list_entities(
+        self,
+        endpoint: str,
+        key: str,
+        params: dict[str, Any],
+        limit: int | None,
+        page: int | None,
+    ) -> list[dict[str, Any]] | dict[str, Any]:
+        """GET a Kommo list endpoint.
+
+        Without `page`, returns the plain item list (one request, unchanged behavior).
+        With `page`, returns {"items", "page", "limit", "has_next"} so callers can continue.
+        """
+        if page is not None and page < 1:
+            raise ValueError("page must be an integer >= 1")
+        query = dict(params)
+        if limit is not None:
+            query["limit"] = max(1, min(limit, MAX_PAGE_LIMIT))
+        if page is not None:
+            query["page"] = page
+        data = await self.get(endpoint, params=query)
+        items = data.get("_embedded", {}).get(key, [])
+        if page is None:
+            return items
+        return {
+            "items": items,
+            "page": data.get("_page", page),
+            "limit": query.get("limit", 50),
+            "has_next": bool(data.get("_links", {}).get("next")),
+        }
+
     # --- Leads ---
 
     async def list_leads(
@@ -345,13 +379,12 @@ class KommoClient:
     # --- Contacts ---
 
     async def list_contacts(
-        self, query: str | None = None, limit: int = 50
-    ) -> list[dict[str, Any]]:
-        params: dict[str, Any] = {"limit": min(limit, 100)}
+        self, query: str | None = None, limit: int = 50, page: int | None = None
+    ) -> list[dict[str, Any]] | dict[str, Any]:
+        params: dict[str, Any] = {}
         if query:
             params["query"] = query
-        data = await self.get("/contacts", params=params)
-        return data.get("_embedded", {}).get("contacts", [])
+        return await self._list_entities("/contacts", "contacts", params, limit, page)
 
     async def get_contact(self, contact_id: int) -> dict[str, Any]:
         return await self.get(
@@ -498,7 +531,9 @@ class KommoClient:
         self,
         lead_id: int | None = None,
         filter_overdue: bool = False,
-    ) -> list[dict[str, Any]]:
+        limit: int | None = None,
+        page: int | None = None,
+    ) -> list[dict[str, Any]] | dict[str, Any]:
         params: dict[str, Any] = {}
         if lead_id:
             params["filter[entity_id]"] = lead_id
@@ -506,8 +541,7 @@ class KommoClient:
         if filter_overdue:
             params["filter[complete_till][to]"] = int(time.time())
             params["filter[is_completed]"] = 0
-        data = await self.get("/tasks", params=params)
-        return data.get("_embedded", {}).get("tasks", [])
+        return await self._list_entities("/tasks", "tasks", params, limit, page)
 
     async def add_note(self, lead_id: int, text: str) -> dict[str, Any]:
         payload = {"entity_id": lead_id, "note_type": "common", "params": {"text": text}}
@@ -553,9 +587,10 @@ class KommoClient:
         data = await self.post("/companies", json=[payload])
         return data.get("_embedded", {}).get("companies", [{}])[0]
 
-    async def list_companies(self, limit: int = 50) -> list[dict[str, Any]]:
-        data = await self.get("/companies", params={"limit": min(limit, 100)})
-        return data.get("_embedded", {}).get("companies", [])
+    async def list_companies(
+        self, limit: int = 50, page: int | None = None
+    ) -> list[dict[str, Any]] | dict[str, Any]:
+        return await self._list_entities("/companies", "companies", {}, limit, page)
 
     # --- Leads Complex ---
 
