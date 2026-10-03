@@ -335,8 +335,8 @@ def get_lead_tools() -> list[types.Tool]:
             description=(
                 "Detach a tag from a lead by name. Reads the lead's tags and writes back the list "
                 "without that tag; other tags are kept. The tag itself is not deleted from the "
-                "account, but a tag name that does not exist yet is created as a side effect. "
-                "Safe to repeat. Returns the updated lead."
+                "account. If no tag with that name exists, nothing changes and the lead is "
+                "returned as is. Safe to repeat. Returns the updated lead."
             ),
             inputSchema={
                 "type": "object",
@@ -360,18 +360,20 @@ def get_lead_tools() -> list[types.Tool]:
         types.Tool(
             name="list_tags",
             description=(
-                "List tags defined in the account (first 100). Read-only. Returns tag objects with "
-                "id and name. Use it to check exact tag names before add_tag or remove_tag."
+                "List tags defined in the account for one entity type (up to 250). Read-only. "
+                "Returns tag objects with id and name. Use it to check exact tag names before "
+                "add_tag or remove_tag."
             ),
             inputSchema={
                 "type": "object",
                 "properties": {
                     "entity_type": {
                         "type": "string",
+                        "enum": ["lead", "leads", "contact", "contacts", "company", "companies"],
                         "default": "lead",
                         "description": (
-                            "Entity type, inserted as-is into the Kommo path /{entity_type}/tags. "
-                            "Default \"lead\"."
+                            "Which tag set to list: leads, contacts or companies (singular forms "
+                            "accepted). Default \"lead\"."
                         ),
                     },
                 },
