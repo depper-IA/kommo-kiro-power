@@ -17,7 +17,7 @@
   "homepage": "https://github.com/depper-IA/kommo-kiro-power",
   "support": "https://github.com/depper-IA/kommo-kiro-power/issues",
   "server": {
-    "type": "uv",
+    "type": "python",
     "entry_point": "src/server.py",
     "mcp_config": {
       "command": "uv",
