@@ -1,0 +1,15 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "kommo-crm",
+  "version": "1.0.3",
+  "description": "Manage leads, contacts, pipelines, tasks, notes, tags and companies in Kommo CRM using natural language",
+  "author": {
+    "name": "Sam Wilkie",
+    "url": "https://sam.wilkiedevs.com",
+    "email": "sam@wilkiedevs.com"
+  },
+  "keywords": ["kommo", "crm", "leads", "contacts", "pipelines", "sales", "amocrm", "tasks", "deals", "companies", "custom-fields", "notes", "tags"],
+  "homepage": "https://github.com/depper-IA/kommo-kiro-power#readme",
+  "repository": "https://github.com/depper-IA/kommo-kiro-power",
+  "license": "MIT"
+}

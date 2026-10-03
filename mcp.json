@@ -1,12 +1,16 @@
 {
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
   "mcpServers": {
     "kommo": {
-      "command": "python",
-      "args": ["-m", "kommo_mcp"],
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--from", "kommo-kiro-power", "kommo-mcp"],
       "env": {
+        "KOMMO_SUBDOMAIN": "${KOMMO_SUBDOMAIN}",
+        "KOMMO_ACCESS_TOKEN": "${KOMMO_ACCESS_TOKEN}",
+        "KOMMO_REFRESH_TOKEN": "${KOMMO_REFRESH_TOKEN}",
         "KOMMO_CLIENT_ID": "${KOMMO_CLIENT_ID}",
         "KOMMO_CLIENT_SECRET": "${KOMMO_CLIENT_SECRET}",
-        "KOMMO_SUBDOMAIN": "${KOMMO_SUBDOMAIN}",
         "KOMMO_REDIRECT_URI": "${KOMMO_REDIRECT_URI}"
       }
     }

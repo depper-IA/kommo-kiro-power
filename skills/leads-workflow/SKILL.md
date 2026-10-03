@@ -1,3 +1,8 @@
+---
+name: leads-workflow
+description: Create, update, move and qualify Kommo leads in the right pipeline and stage
+---
+
 # Leads Workflow
 
 ## Creating Leads
