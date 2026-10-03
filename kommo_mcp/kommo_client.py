@@ -27,6 +27,16 @@ BASE_DELAY = 1.0  # seconds
 RATE_LIMIT = 5  # requests per second
 TIMEOUT = 30  # seconds
 
+# Kommo API v4 tag endpoints are /{leads|contacts|companies}/tags; singular aliases are accepted
+TAG_ENTITY_PATHS = {
+    "lead": "leads",
+    "leads": "leads",
+    "contact": "contacts",
+    "contacts": "contacts",
+    "company": "companies",
+    "companies": "companies",
+}
+
 ENV_PATH = os.path.normpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
 )
@@ -196,18 +206,34 @@ class KommoClient:
 
     # --- Tags ---
 
-    async def _get_or_create_tag_id(self, tag_name: str) -> int:
-        """Resolve tag name to ID, creating if necessary."""
+    @staticmethod
+    def _tags_endpoint(entity_type: str) -> str:
+        path = TAG_ENTITY_PATHS.get(entity_type.strip().lower())
+        if not path:
+            raise ValueError(
+                f"Unsupported entity_type '{entity_type}': use leads, contacts or companies"
+            )
+        return f"/{path}/tags"
+
+    async def _find_tag_id(self, tag_name: str) -> int:
+        """Resolve a lead tag name to its ID, or 0 when it does not exist."""
         if tag_name in self._tags_cache:
             return self._tags_cache[tag_name]
 
-        data = await self.get("/tags", params={"type": "lead", "limit": 100})
+        data = await self.get("/leads/tags", params={"filter[name]": tag_name, "limit": 250})
         for tag in data.get("_embedded", {}).get("tags", []):
-            if tag["name"] == tag_name:
+            if tag.get("name") == tag_name:
                 self._tags_cache[tag_name] = tag["id"]
                 return tag["id"]
+        return 0
 
-        created = await self.post("/tags", json=[{"name": tag_name, "type": "lead"}])
+    async def _get_or_create_tag_id(self, tag_name: str) -> int:
+        """Resolve a lead tag name to its ID, creating the tag if necessary."""
+        tag_id = await self._find_tag_id(tag_name)
+        if tag_id:
+            return tag_id
+
+        created = await self.post("/leads/tags", json=[{"name": tag_name}])
         tag = created.get("_embedded", {}).get("tags", [{}])[0]
         tag_id = tag.get("id", 0)
         if tag_id:
@@ -418,8 +444,7 @@ class KommoClient:
     # --- Tags ---
 
     async def list_tags(self, entity_type: str = "lead") -> list[dict[str, Any]]:
-        endpoint = f"/{entity_type}/tags"
-        data = await self.get(endpoint, params={"limit": 100})
+        data = await self.get(self._tags_endpoint(entity_type), params={"limit": 250})
         return data.get("_embedded", {}).get("tags", [])
 
     async def add_tag(self, lead_id: int, tag_name: str) -> dict[str, Any]:
@@ -434,8 +459,10 @@ class KommoClient:
         )
 
     async def remove_tag(self, lead_id: int, tag_name: str) -> dict[str, Any]:
-        tag_id = await self._get_or_create_tag_id(tag_name)
+        tag_id = await self._find_tag_id(tag_name)
         lead = await self.get_lead(lead_id)
+        if not tag_id:
+            return lead
         existing = [t["id"] for t in lead.get("_embedded", {}).get("tags", [])]
         updated = [tid for tid in existing if tid != tag_id]
         return await self.patch(
