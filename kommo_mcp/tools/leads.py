@@ -8,207 +8,510 @@ import mcp.types as types
 
 from ..kommo_client import KommoClient
 
+LEAD_ID = "Kommo lead ID (integer). Obtain it from list_leads or from the create_lead result."
+
 
 def get_lead_tools() -> list[types.Tool]:
     return [
         types.Tool(
             name="list_leads",
-            description="List leads with optional filters by pipeline and stage.",
+            description=(
+                "List leads, optionally filtered by pipeline and stage. Read-only. Returns an array "
+                "of lead objects with embedded contacts and tags, up to `limit` items (follows "
+                "Kommo pagination when limit exceeds 50). To fetch custom fields for one lead, "
+                "use get_lead."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "pipeline_id": {"type": "integer", "description": "Filter by pipeline ID"},
-                    "stage_id": {"type": "integer", "description": "Filter by stage ID"},
-                    "limit": {"type": "integer", "default": 50, "description": "Max leads to return"},
+                    "pipeline_id": {
+                        "type": "integer",
+                        "description": "Only leads in this pipeline. Get IDs from list_pipelines.",
+                    },
+                    "stage_id": {
+                        "type": "integer",
+                        "description": (
+                            "Only leads in this stage. Ignored unless pipeline_id is also set. "
+                            "Get IDs from list_stages."
+                        ),
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "Maximum number of leads to return. Default 50.",
+                    },
                 },
             },
+            annotations=types.ToolAnnotations(
+                title="List leads",
+                readOnlyHint=True,
+                destructiveHint=False,
+                idempotentHint=True,
+                openWorldHint=True,
+            ),
         ),
         types.Tool(
             name="get_lead",
-            description="Get a complete lead by ID with contacts, tags, and custom fields.",
+            description=(
+                "Fetch one lead by ID. Read-only. Returns the full lead object including embedded "
+                "contacts, tags, and custom_fields_values. Use list_leads instead to browse or "
+                "find lead IDs."
+            ),
             inputSchema={
                 "type": "object",
                 "required": ["lead_id"],
-                "properties": {"lead_id": {"type": "integer", "description": "The lead ID"}},
+                "properties": {"lead_id": {"type": "integer", "description": LEAD_ID}},
             },
+            annotations=types.ToolAnnotations(
+                title="Get lead",
+                readOnlyHint=True,
+                destructiveHint=False,
+                idempotentHint=True,
+                openWorldHint=True,
+            ),
         ),
         types.Tool(
             name="create_lead",
-            description="Create a new lead in Kommo.",
+            description=(
+                "Create one lead in Kommo. Not idempotent: each call creates a new lead. Tag names "
+                "that do not exist yet are created automatically. Returns the created lead object. "
+                "To create the contact and company in the same call, use create_lead_complex."
+            ),
             inputSchema={
                 "type": "object",
                 "required": ["name"],
                 "properties": {
-                    "name": {"type": "string", "description": "Lead name"},
-                    "price": {"type": "number", "description": "Deal value"},
-                    "pipeline_id": {"type": "integer", "description": "Target pipeline ID"},
-                    "stage_id": {"type": "integer", "description": "Target stage ID"},
-                    "tags": {"type": "array", "items": {"type": "string"}, "description": "Tag names"},
-                    "responsible_user_id": {"type": "integer", "description": "Assigned user ID"},
+                    "name": {"type": "string", "description": "Lead name (title of the deal)."},
+                    "price": {
+                        "type": "number",
+                        "description": "Deal value in the account currency, e.g. 1500.",
+                    },
+                    "pipeline_id": {
+                        "type": "integer",
+                        "description": (
+                            "Pipeline to create the lead in. Get IDs from list_pipelines. "
+                            "Omit to use the account default."
+                        ),
+                    },
+                    "stage_id": {
+                        "type": "integer",
+                        "description": (
+                            "Stage (status) to place the lead in. Get IDs from list_stages. "
+                            "Omit for the first stage of the pipeline."
+                        ),
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Tag names to attach, e.g. [\"vip\", \"web\"]. Created if missing.",
+                    },
+                    "responsible_user_id": {
+                        "type": "integer",
+                        "description": "Kommo user ID to assign as owner. Omit for the default user.",
+                    },
                 },
             },
+            annotations=types.ToolAnnotations(
+                title="Create lead",
+                readOnlyHint=False,
+                destructiveHint=False,
+                idempotentHint=False,
+                openWorldHint=True,
+            ),
         ),
         types.Tool(
             name="update_lead",
-            description="Update fields on an existing lead.",
+            description=(
+                "Update fields on an existing lead by sending `fields` as the body of a Kommo API v4 "
+                "PATCH /leads/{id}. Returns the updated lead. Overwrites the given values; omitted "
+                "fields are untouched. For a stage change prefer move_lead_stage; for several leads "
+                "use bulk_update_leads."
+            ),
             inputSchema={
                 "type": "object",
                 "required": ["lead_id", "fields"],
                 "properties": {
-                    "lead_id": {"type": "integer", "description": "The lead ID"},
-                    "fields": {"type": "object", "description": "Fields to update"},
+                    "lead_id": {"type": "integer", "description": LEAD_ID},
+                    "fields": {
+                        "type": "object",
+                        "description": (
+                            "Raw Kommo v4 lead fields to change, passed through unchanged. Common keys: "
+                            "name (string), price (integer), status_id (stage ID), pipeline_id, "
+                            "responsible_user_id, custom_fields_values (array of "
+                            "{field_id, values: [{value}]}), _embedded.tags (full replacement list of "
+                            "{id}). Example: {\"name\": \"Acme renewal\", \"price\": 2000}."
+                        ),
+                    },
                 },
             },
+            annotations=types.ToolAnnotations(
+                title="Update lead",
+                readOnlyHint=False,
+                destructiveHint=False,
+                idempotentHint=True,
+                openWorldHint=True,
+            ),
         ),
         types.Tool(
             name="delete_lead",
-            description="Delete (soft-delete) a lead.",
+            description=(
+                "Delete a lead. Sends PATCH /leads/{id} with is_deleted=true, so the lead is "
+                "soft-deleted rather than removed through a hard-delete call. Destructive: the "
+                "lead disappears from normal lists. Confirm the lead_id with get_lead first."
+            ),
             inputSchema={
                 "type": "object",
                 "required": ["lead_id"],
-                "properties": {"lead_id": {"type": "integer", "description": "The lead ID"}},
+                "properties": {"lead_id": {"type": "integer", "description": LEAD_ID}},
             },
+            annotations=types.ToolAnnotations(
+                title="Delete lead",
+                readOnlyHint=False,
+                destructiveHint=True,
+                idempotentHint=True,
+                openWorldHint=True,
+            ),
         ),
         types.Tool(
             name="move_lead_stage",
-            description="Move a lead to a different pipeline stage.",
+            description=(
+                "Move a lead to another stage by setting its status_id (and optionally pipeline_id). "
+                "Returns the updated lead. Use this instead of update_lead for pipeline moves. "
+                "Pass pipeline_id when moving to a stage in a different pipeline."
+            ),
             inputSchema={
                 "type": "object",
                 "required": ["lead_id", "stage_id"],
                 "properties": {
-                    "lead_id": {"type": "integer", "description": "The lead ID"},
-                    "stage_id": {"type": "integer", "description": "Target stage ID"},
-                    "pipeline_id": {"type": "integer", "description": "Target pipeline ID (optional if same pipeline)"},
+                    "lead_id": {"type": "integer", "description": LEAD_ID},
+                    "stage_id": {
+                        "type": "integer",
+                        "description": "Target stage ID. Get IDs from list_stages.",
+                    },
+                    "pipeline_id": {
+                        "type": "integer",
+                        "description": (
+                            "Target pipeline ID. Only needed when the stage belongs to a "
+                            "different pipeline than the lead's current one."
+                        ),
+                    },
                 },
             },
+            annotations=types.ToolAnnotations(
+                title="Move lead to stage",
+                readOnlyHint=False,
+                destructiveHint=False,
+                idempotentHint=True,
+                openWorldHint=True,
+            ),
         ),
         types.Tool(
             name="bulk_update_leads",
-            description="Bulk update multiple leads in one request.",
+            description=(
+                "Update many leads in a single PATCH /leads request. Each item merges its `fields` "
+                "with the lead `id` and uses the same field keys as update_lead. Returns the Kommo "
+                "response for the batch. Use update_lead for a single lead."
+            ),
             inputSchema={
                 "type": "object",
                 "required": ["leads_updates"],
                 "properties": {
                     "leads_updates": {
                         "type": "array",
+                        "description": (
+                            "Updates to apply, one per lead. Example: "
+                            "[{\"id\": 123, \"fields\": {\"status_id\": 456}}]."
+                        ),
                         "items": {
                             "type": "object",
                             "properties": {
-                                "id": {"type": "integer"},
-                                "fields": {"type": "object"},
+                                "id": {"type": "integer", "description": LEAD_ID},
+                                "fields": {
+                                    "type": "object",
+                                    "description": (
+                                        "Raw Kommo v4 lead fields to change for this lead "
+                                        "(see update_lead)."
+                                    ),
+                                },
                             },
                             "required": ["id", "fields"],
                         },
-                        "description": "Array of {id, fields} objects",
                     }
                 },
             },
+            annotations=types.ToolAnnotations(
+                title="Bulk update leads",
+                readOnlyHint=False,
+                destructiveHint=False,
+                idempotentHint=True,
+                openWorldHint=True,
+            ),
         ),
         types.Tool(
             name="create_lead_complex",
-            description="Create a lead with associated contact and company in one call.",
+            description=(
+                "Create a lead together with a new contact and/or company in one request "
+                "(POST /leads/complex). Not idempotent: always creates new records, never links "
+                "existing ones. Returns the created lead. Phone and email are stored only if the "
+                "account has contact fields named or coded PHONE and EMAIL. Use create_lead if no "
+                "contact or company is needed."
+            ),
             inputSchema={
                 "type": "object",
                 "required": ["name"],
                 "properties": {
-                    "name": {"type": "string", "description": "Lead name"},
-                    "pipeline_id": {"type": "integer"},
-                    "stage_id": {"type": "integer"},
-                    "contact_name": {"type": "string", "description": "Contact full name"},
-                    "contact_phone": {"type": "string", "description": "Contact phone number"},
-                    "contact_email": {"type": "string", "description": "Contact email"},
-                    "company_name": {"type": "string", "description": "Company name"},
-                    "tags": {"type": "array", "items": {"type": "string"}},
+                    "name": {"type": "string", "description": "Lead name (title of the deal)."},
+                    "pipeline_id": {
+                        "type": "integer",
+                        "description": "Pipeline for the lead. Get IDs from list_pipelines.",
+                    },
+                    "stage_id": {
+                        "type": "integer",
+                        "description": "Stage for the lead. Get IDs from list_stages.",
+                    },
+                    "contact_name": {
+                        "type": "string",
+                        "description": (
+                            "Name of a new contact to create. Phone and email are ignored "
+                            "unless this is set."
+                        ),
+                    },
+                    "contact_phone": {
+                        "type": "string",
+                        "description": "Contact phone number, e.g. +15551234567.",
+                    },
+                    "contact_email": {
+                        "type": "string",
+                        "description": "Contact email address.",
+                    },
+                    "company_name": {
+                        "type": "string",
+                        "description": "Name of a new company to create and attach.",
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Tag names to attach to the lead. Created if missing.",
+                    },
                 },
             },
+            annotations=types.ToolAnnotations(
+                title="Create lead with contact and company",
+                readOnlyHint=False,
+                destructiveHint=False,
+                idempotentHint=False,
+                openWorldHint=True,
+            ),
         ),
         types.Tool(
             name="add_tag",
-            description="Add a tag to a lead (creates the tag if it doesn't exist).",
+            description=(
+                "Attach a tag to a lead by name. Creates the tag if it does not exist. Reads the "
+                "lead's current tags and writes back the full list plus the new one, so existing "
+                "tags are kept. Safe to repeat. Returns the updated lead. See list_tags for "
+                "existing tag names."
+            ),
             inputSchema={
                 "type": "object",
                 "required": ["lead_id", "tag_name"],
                 "properties": {
-                    "lead_id": {"type": "integer"},
-                    "tag_name": {"type": "string"},
+                    "lead_id": {"type": "integer", "description": LEAD_ID},
+                    "tag_name": {
+                        "type": "string",
+                        "description": "Exact tag name (case-sensitive), e.g. \"vip\".",
+                    },
                 },
             },
+            annotations=types.ToolAnnotations(
+                title="Add tag to lead",
+                readOnlyHint=False,
+                destructiveHint=False,
+                idempotentHint=True,
+                openWorldHint=True,
+            ),
         ),
         types.Tool(
             name="remove_tag",
-            description="Remove a tag from a lead.",
+            description=(
+                "Detach a tag from a lead by name. Reads the lead's tags and writes back the list "
+                "without that tag; other tags are kept. The tag itself is not deleted from the "
+                "account, but a tag name that does not exist yet is created as a side effect. "
+                "Safe to repeat. Returns the updated lead."
+            ),
             inputSchema={
                 "type": "object",
                 "required": ["lead_id", "tag_name"],
                 "properties": {
-                    "lead_id": {"type": "integer"},
-                    "tag_name": {"type": "string"},
+                    "lead_id": {"type": "integer", "description": LEAD_ID},
+                    "tag_name": {
+                        "type": "string",
+                        "description": "Exact tag name (case-sensitive) to detach, e.g. \"vip\".",
+                    },
                 },
             },
+            annotations=types.ToolAnnotations(
+                title="Remove tag from lead",
+                readOnlyHint=False,
+                destructiveHint=False,
+                idempotentHint=True,
+                openWorldHint=True,
+            ),
         ),
         types.Tool(
             name="list_tags",
-            description="List all available tags.",
+            description=(
+                "List tags defined in the account (first 100). Read-only. Returns tag objects with "
+                "id and name. Use it to check exact tag names before add_tag or remove_tag."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "entity_type": {"type": "string", "default": "lead", "description": "Entity type (lead, contact, company)"},
+                    "entity_type": {
+                        "type": "string",
+                        "default": "lead",
+                        "description": (
+                            "Entity type, inserted as-is into the Kommo path /{entity_type}/tags. "
+                            "Default \"lead\"."
+                        ),
+                    },
                 },
             },
+            annotations=types.ToolAnnotations(
+                title="List tags",
+                readOnlyHint=True,
+                destructiveHint=False,
+                idempotentHint=True,
+                openWorldHint=True,
+            ),
         ),
         types.Tool(
             name="create_task",
-            description="Create a task associated with a lead.",
+            description=(
+                "Create a follow-up task (type 1) attached to a lead. Not idempotent: each call "
+                "creates a new task. Returns the created task. Use list_tasks to review existing "
+                "tasks and add_note for non-actionable remarks."
+            ),
             inputSchema={
                 "type": "object",
                 "required": ["lead_id", "text", "due_date"],
                 "properties": {
-                    "lead_id": {"type": "integer"},
-                    "text": {"type": "string", "description": "Task description"},
-                    "due_date": {"type": "integer", "description": "Due date as Unix timestamp"},
-                    "responsible_user_id": {"type": "integer"},
+                    "lead_id": {"type": "integer", "description": LEAD_ID},
+                    "text": {"type": "string", "description": "Task description shown in Kommo."},
+                    "due_date": {
+                        "type": "integer",
+                        "description": "Deadline as a Unix timestamp in seconds, e.g. 1767225600.",
+                    },
+                    "responsible_user_id": {
+                        "type": "integer",
+                        "description": "Kommo user ID responsible for the task. Omit for the default.",
+                    },
                 },
             },
+            annotations=types.ToolAnnotations(
+                title="Create task",
+                readOnlyHint=False,
+                destructiveHint=False,
+                idempotentHint=False,
+                openWorldHint=True,
+            ),
         ),
         types.Tool(
             name="list_tasks",
-            description="List tasks, optionally filtered by lead.",
+            description=(
+                "List tasks, optionally for one lead or only overdue ones. Read-only. Returns one "
+                "page of Kommo's default size (no pagination or limit parameter). Overdue means "
+                "deadline at or before now and not completed."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "lead_id": {"type": "integer"},
-                    "filter_overdue": {"type": "boolean", "default": False},
+                    "lead_id": {
+                        "type": "integer",
+                        "description": "Only tasks attached to this lead. Omit for all tasks.",
+                    },
+                    "filter_overdue": {
+                        "type": "boolean",
+                        "default": False,
+                        "description": "If true, only uncompleted tasks whose deadline has passed.",
+                    },
                 },
             },
+            annotations=types.ToolAnnotations(
+                title="List tasks",
+                readOnlyHint=True,
+                destructiveHint=False,
+                idempotentHint=True,
+                openWorldHint=True,
+            ),
         ),
         types.Tool(
             name="add_note",
-            description="Add a text note to a lead.",
+            description=(
+                "Add a plain text (common) note to a lead's timeline. Not idempotent: repeated calls "
+                "add duplicate notes. Notes are internal and are not sent to the customer; use "
+                "send_chat_message for that. Returns the created note."
+            ),
             inputSchema={
                 "type": "object",
                 "required": ["lead_id", "text"],
                 "properties": {
-                    "lead_id": {"type": "integer"},
-                    "text": {"type": "string", "description": "Note content"},
+                    "lead_id": {"type": "integer", "description": LEAD_ID},
+                    "text": {"type": "string", "description": "Note content (plain text)."},
                 },
             },
+            annotations=types.ToolAnnotations(
+                title="Add note to lead",
+                readOnlyHint=False,
+                destructiveHint=False,
+                idempotentHint=False,
+                openWorldHint=True,
+            ),
         ),
         types.Tool(
             name="send_chat_message",
-            description="Send a chat message to a lead's active conversation.",
+            description=(
+                "Send an outgoing chat message to the customer in a lead's conversation. Finds the "
+                "first conversation (talk) linked to the lead and posts to it; fails with an error "
+                "if the lead has none. The message is delivered externally and cannot be recalled "
+                "by this server, and repeated calls send duplicates. Use add_note for internal notes."
+            ),
             inputSchema={
                 "type": "object",
                 "required": ["lead_id", "text"],
                 "properties": {
-                    "lead_id": {"type": "integer"},
-                    "text": {"type": "string"},
+                    "lead_id": {
+                        "type": "integer",
+                        "description": (
+                            "ID of a lead that already has an active conversation. "
+                            "Get it from list_leads."
+                        ),
+                    },
+                    "text": {"type": "string", "description": "Message text sent to the customer."},
                 },
             },
+            annotations=types.ToolAnnotations(
+                title="Send chat message",
+                readOnlyHint=False,
+                destructiveHint=False,
+                idempotentHint=False,
+                openWorldHint=True,
+            ),
         ),
         types.Tool(
             name="list_chat_templates",
-            description="List available chat message templates.",
+            description=(
+                "List the account's chat message templates. Read-only. Returns template objects "
+                "as provided by Kommo. This server cannot send a template; it only lists them "
+                "(send_chat_message sends plain text)."
+            ),
             inputSchema={"type": "object", "properties": {}},
+            annotations=types.ToolAnnotations(
+                title="List chat templates",
+                readOnlyHint=True,
+                destructiveHint=False,
+                idempotentHint=True,
+                openWorldHint=True,
+            ),
         ),
     ]
 
