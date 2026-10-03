@@ -71,10 +71,9 @@ def get_contact_tools() -> list[types.Tool]:
             name="create_contact",
             description=(
                 "Create one contact. Not idempotent: it does not check for duplicates, so search "
-                "with list_contacts first. Phone and email are stored (as WORK values) only if the "
-                "account has contact fields named or coded PHONE and EMAIL; otherwise they are "
-                "silently skipped. Returns the created contact. To create a lead and contact "
-                "together, use create_lead_complex."
+                "with list_contacts first. Phone and email are sent as Kommo's built-in PHONE and "
+                "EMAIL fields (WORK values). Returns the created contact. To create a lead and "
+                "contact together, use create_lead_complex."
             ),
             inputSchema={
                 "type": "object",
