@@ -6,6 +6,7 @@ Defines the MCP server and registers all tools.
 
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any
 
@@ -29,14 +30,18 @@ def create_app() -> Server:
         return get_tool_definitions()
 
     @app.call_tool()
-    async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextContent]:
-        from .tools import handle_tool_call
+    async def call_tool(name: str, arguments: dict[str, Any]) -> Any:
+        from .tools import execute_tool, to_structured
 
         try:
-            result = await handle_tool_call(client, name, arguments)
-            return [types.TextContent(type="text", text=result)]
+            result = await execute_tool(client, name, arguments)
         except Exception as e:
             logger.error(f"Error executing {name}: {e}", exc_info=True)
-            return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+            return types.CallToolResult(
+                content=[types.TextContent(type="text", text=f"Error: {e}")],
+                isError=True,
+            )
+        text = json.dumps(result, ensure_ascii=False, indent=2)
+        return [types.TextContent(type="text", text=text)], to_structured(result)
 
     return app
