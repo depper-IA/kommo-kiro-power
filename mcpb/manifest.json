@@ -2,7 +2,7 @@
   "manifest_version": "0.4",
   "name": "kommo-kiro-power",
   "display_name": "Kommo CRM",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Manage Kommo CRM leads, contacts, pipelines, tasks, notes, tags and companies.",
   "long_description": "Connect AI agents to Kommo CRM (formerly amoCRM). List, create and update leads, contacts and companies, move leads between pipeline stages, create tasks, add notes and tags, and manage custom fields in natural language. Runs locally and talks only to your own Kommo account.",
   "author": {

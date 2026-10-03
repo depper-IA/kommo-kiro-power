@@ -32,3 +32,15 @@ def test_smithery_tools_include_input_schema() -> None:
 def test_smithery_tools_include_annotations() -> None:
     tools = build_mcpb.smithery_tools()
     assert all(t.get("annotations") for t in tools)
+
+
+def test_smithery_tools_include_object_output_schema() -> None:
+    tools = build_mcpb.smithery_tools()
+    assert all(t["outputSchema"]["type"] == "object" for t in tools)
+    assert {t["name"]: t["outputSchema"] for t in tools} == {
+        t.name: t.outputSchema for t in get_tool_definitions()
+    }
+
+
+def test_spec_manifest_tools_have_no_extra_keys() -> None:
+    assert all(set(t) == {"name", "description"} for t in build_mcpb.spec_tools())

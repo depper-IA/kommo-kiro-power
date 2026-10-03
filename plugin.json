@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "kommo-crm",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Manage leads, contacts, pipelines, tasks, notes, tags and companies in Kommo CRM using natural language",
   "author": {
     "name": "Sam Wilkie",
