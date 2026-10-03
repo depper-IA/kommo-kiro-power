@@ -283,8 +283,10 @@ class KommoClient:
         tags: list[str] | None = None,
         responsible_user_id: int | None = None,
         price: float | None = None,
+        custom_fields_values: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
-        """Create a new lead."""
+        """Create a new lead. `custom_fields` is a legacy alias of `custom_fields_values`."""
+        custom_fields = custom_fields_values or custom_fields
         payload: dict[str, Any] = {"name": name}
         if pipeline_id:
             payload["pipeline_id"] = pipeline_id
@@ -567,8 +569,13 @@ class KommoClient:
         company_name: str | None = None,
         tags: list[str] | None = None,
         custom_fields: list[dict[str, Any]] | None = None,
+        custom_fields_values: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
-        """Create lead + contact + company in one call."""
+        """Create lead + contact + company in one call.
+
+        `custom_fields` is a legacy alias of `custom_fields_values`.
+        """
+        custom_fields = custom_fields_values or custom_fields
         payload: dict[str, Any] = {"name": name}
         if pipeline_id:
             payload["pipeline_id"] = pipeline_id

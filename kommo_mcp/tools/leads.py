@@ -10,6 +10,35 @@ from ..kommo_client import KommoClient
 
 LEAD_ID = "Kommo lead ID (integer). Obtain it from list_leads or from the create_lead result."
 
+CUSTOM_FIELDS_VALUES = {
+    "type": "array",
+    "description": (
+        "Lead custom field values in Kommo API v4 format: a list of objects, each addressing a "
+        "field by `field_id` (from list_custom_fields) or by system `field_code`, plus "
+        "`values`: [{value}] (select-type fields also take enum_id or enum_code). "
+        "Example: [{\"field_id\": 123456, \"values\": [{\"value\": \"Website\"}]}]."
+    ),
+    "items": {
+        "type": "object",
+        "required": ["values"],
+        "properties": {
+            "field_id": {
+                "type": "integer",
+                "description": "Custom field ID from list_custom_fields. Use this or field_code.",
+            },
+            "field_code": {
+                "type": "string",
+                "description": "Field system code, e.g. UTM_SOURCE. Use this or field_id.",
+            },
+            "values": {
+                "type": "array",
+                "description": "One or more values to store, each as {value} (plus enum_id/enum_code).",
+                "items": {"type": "object"},
+            },
+        },
+    },
+}
+
 
 def get_lead_tools() -> list[types.Tool]:
     return [
@@ -109,6 +138,7 @@ def get_lead_tools() -> list[types.Tool]:
                         "type": "integer",
                         "description": "Kommo user ID to assign as owner. Omit for the default user.",
                     },
+                    "custom_fields_values": CUSTOM_FIELDS_VALUES,
                 },
             },
             annotations=types.ToolAnnotations(
@@ -293,6 +323,7 @@ def get_lead_tools() -> list[types.Tool]:
                         "items": {"type": "string"},
                         "description": "Tag names to attach to the lead. Created if missing.",
                     },
+                    "custom_fields_values": CUSTOM_FIELDS_VALUES,
                 },
             },
             annotations=types.ToolAnnotations(
