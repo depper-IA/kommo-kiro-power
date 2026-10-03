@@ -27,3 +27,8 @@ def test_smithery_tools_include_input_schema() -> None:
     tools = build_mcpb.smithery_tools()
     assert len(tools) == len(get_tool_definitions())
     assert all(isinstance(t["inputSchema"], dict) for t in tools)
+
+
+def test_smithery_tools_include_annotations() -> None:
+    tools = build_mcpb.smithery_tools()
+    assert all(t.get("annotations") for t in tools)
