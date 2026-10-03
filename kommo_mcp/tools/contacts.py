@@ -18,10 +18,10 @@ def get_contact_tools() -> list[types.Tool]:
         types.Tool(
             name="list_contacts",
             description=(
-                "Search or list contacts. Read-only. Returns one page of contact objects, at most "
-                "`limit` (capped at 100), with no further pagination. Pass `query` to match by name, "
-                "phone, or email; omit it to list recent contacts. Use get_contact for one contact's "
-                "full details."
+                "Search or list contacts. Read-only. Returns an array of up to `limit` contacts "
+                "(max 250); pass `page` for paginated output with a has_next flag. Pass `query` "
+                "to match by name, phone, or email; omit it to list recent contacts. Use "
+                "get_contact for one contact's full details."
             ),
             inputSchema={
                 "type": "object",
@@ -36,7 +36,18 @@ def get_contact_tools() -> list[types.Tool]:
                     "limit": {
                         "type": "integer",
                         "default": 50,
-                        "description": "Maximum contacts to return. Default 50, capped at 100.",
+                        "minimum": 1,
+                        "maximum": 250,
+                        "description": "Contacts per page. Default 50, capped at 250.",
+                    },
+                    "page": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": (
+                            "1-based page number. Omit for a plain array (first page). When set, "
+                            "returns {items, page, limit, has_next}; request page+1 while "
+                            "has_next is true."
+                        ),
                     },
                 },
             },
@@ -137,7 +148,9 @@ def get_contact_tools() -> list[types.Tool]:
 async def handle_contact_tool(client: KommoClient, name: str, args: dict[str, Any]) -> Any | None:
     """Handle contact-related tool calls."""
     if name == "list_contacts":
-        return await client.list_contacts(args.get("query"), args.get("limit", 50))
+        return await client.list_contacts(
+            args.get("query"), args.get("limit", 50), args.get("page")
+        )
     if name == "get_contact":
         return await client.get_contact(args["contact_id"])
     if name == "create_contact":

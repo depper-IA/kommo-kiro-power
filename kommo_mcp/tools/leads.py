@@ -420,9 +420,10 @@ def get_lead_tools() -> list[types.Tool]:
         types.Tool(
             name="list_tasks",
             description=(
-                "List tasks, optionally for one lead or only overdue ones. Read-only. Returns one "
-                "page of Kommo's default size (no pagination or limit parameter). Overdue means "
-                "deadline at or before now and not completed."
+                "List tasks, optionally for one lead or only overdue ones. Read-only. Returns an "
+                "array (Kommo default page size unless `limit` is set, max 250); pass `page` for "
+                "paginated output with a has_next flag. Overdue means deadline at or before now "
+                "and not completed."
             ),
             inputSchema={
                 "type": "object",
@@ -435,6 +436,21 @@ def get_lead_tools() -> list[types.Tool]:
                         "type": "boolean",
                         "default": False,
                         "description": "If true, only uncompleted tasks whose deadline has passed.",
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 250,
+                        "description": "Tasks per page, max 250. Omit for Kommo's default (50).",
+                    },
+                    "page": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": (
+                            "1-based page number. Omit for a plain array (first page). When set, "
+                            "returns {items, page, limit, has_next}; request page+1 while "
+                            "has_next is true."
+                        ),
                     },
                 },
             },
@@ -549,7 +565,12 @@ async def handle_lead_tool(client: KommoClient, name: str, args: dict[str, Any])
             args["lead_id"], args["text"], args["due_date"], args.get("responsible_user_id")
         )
     if name == "list_tasks":
-        return await client.list_tasks(args.get("lead_id"), args.get("filter_overdue", False))
+        return await client.list_tasks(
+            args.get("lead_id"),
+            args.get("filter_overdue", False),
+            args.get("limit"),
+            args.get("page"),
+        )
     if name == "add_note":
         return await client.add_note(args["lead_id"], args["text"])
     if name == "send_chat_message":
