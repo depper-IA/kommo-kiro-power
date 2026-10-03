@@ -281,8 +281,8 @@ def get_lead_tools() -> list[types.Tool]:
             name="create_lead_complex",
             description=(
                 "Create a lead together with a new contact and/or company in one request "
-                "(POST /leads/complex). Not idempotent: always creates new records, never links "
-                "existing ones. Returns the created lead. Contact phone and email are sent as Kommo's "
+                "(POST /leads/complex). Not idempotent; Kommo may merge a duplicate (merged=true). "
+                "Returns {id, contact_id, company_id, merged}. Contact phone and email are sent as Kommo's "
                 "built-in PHONE and EMAIL fields. Use create_lead if no contact or company is "
                 "needed."
             ),
@@ -519,8 +519,8 @@ def get_lead_tools() -> list[types.Tool]:
         types.Tool(
             name="send_chat_message",
             description=(
-                "Send an outgoing chat message to the customer in a lead's conversation. Finds the "
-                "first conversation (talk) linked to the lead and posts to it; fails with an error "
+                "Send an outgoing chat message to the customer in a lead's conversation. Finds a "
+                "conversation (talk) whose entity is this lead and posts to it; fails with an error "
                 "if the lead has none. The message is delivered externally and cannot be recalled "
                 "by this server, and repeated calls send duplicates. Use add_note for internal notes."
             ),

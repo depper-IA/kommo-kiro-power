@@ -29,6 +29,8 @@ class FakeClient(KommoClient):
 
     async def post(self, endpoint: str, json: Any, **kwargs: Any) -> dict[str, Any]:
         self.calls.append(("POST", endpoint, json))
+        if endpoint == "/leads/complex":
+            return [{"id": 1, "contact_id": 2, "company_id": 3, "request_id": ["0"], "merged": False}]
         return {"_embedded": {"contacts": [{"id": 1}], "leads": [{"id": 2}]}}
 
 

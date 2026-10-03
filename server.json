@@ -7,12 +7,12 @@
     "url": "https://github.com/depper-IA/kommo-kiro-power",
     "source": "github"
   },
-  "version": "1.0.4",
+  "version": "1.0.5",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "kommo-kiro-power",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"

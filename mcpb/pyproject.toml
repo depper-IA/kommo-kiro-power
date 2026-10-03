@@ -1,6 +1,6 @@
 [project]
 name = "kommo-kiro-power-mcpb"
-version = "1.0.4"
+version = "1.0.5"
 description = "MCPB bundle for the Kommo CRM MCP server"
 requires-python = ">=3.10"
-dependencies = ["kommo-kiro-power==1.0.4"]
+dependencies = ["kommo-kiro-power==1.0.5"]
