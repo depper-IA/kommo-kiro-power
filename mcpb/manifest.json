@@ -1,0 +1,81 @@
+{
+  "manifest_version": "0.4",
+  "name": "kommo-kiro-power",
+  "display_name": "Kommo CRM",
+  "version": "1.0.3",
+  "description": "Manage Kommo CRM leads, contacts, pipelines, tasks, notes, tags and companies.",
+  "long_description": "Connect AI agents to Kommo CRM (formerly amoCRM). List, create and update leads, contacts and companies, move leads between pipeline stages, create tasks, add notes and tags, and manage custom fields in natural language. Runs locally and talks only to your own Kommo account.",
+  "author": {
+    "name": "Sam Wilkie",
+    "email": "sam@wilkiedevs.com",
+    "url": "https://sam.wilkiedevs.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/depper-IA/kommo-kiro-power"
+  },
+  "homepage": "https://github.com/depper-IA/kommo-kiro-power",
+  "support": "https://github.com/depper-IA/kommo-kiro-power/issues",
+  "server": {
+    "type": "uv",
+    "entry_point": "src/server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["run", "--directory", "${__dirname}", "src/server.py"],
+      "env": {
+        "KOMMO_SUBDOMAIN": "${user_config.subdomain}",
+        "KOMMO_ACCESS_TOKEN": "${user_config.access_token}",
+        "KOMMO_REFRESH_TOKEN": "${user_config.refresh_token}",
+        "KOMMO_CLIENT_ID": "${user_config.client_id}",
+        "KOMMO_CLIENT_SECRET": "${user_config.client_secret}"
+      }
+    }
+  },
+  "user_config": {
+    "subdomain": {
+      "type": "string",
+      "title": "Kommo subdomain",
+      "description": "The part before .kommo.com in your account URL",
+      "required": true
+    },
+    "access_token": {
+      "type": "string",
+      "title": "Access token",
+      "description": "Kommo long-lived token or OAuth access token",
+      "sensitive": true,
+      "required": true
+    },
+    "refresh_token": {
+      "type": "string",
+      "title": "Refresh token",
+      "description": "Optional. OAuth refresh token, used to renew the access token",
+      "sensitive": true,
+      "required": false,
+      "default": ""
+    },
+    "client_id": {
+      "type": "string",
+      "title": "Client ID",
+      "description": "Optional. Integration client ID, needed only for token refresh",
+      "required": false,
+      "default": ""
+    },
+    "client_secret": {
+      "type": "string",
+      "title": "Client secret",
+      "description": "Optional. Integration client secret, needed only for token refresh",
+      "sensitive": true,
+      "required": false,
+      "default": ""
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "linux", "win32"],
+    "runtimes": {
+      "python": ">=3.10"
+    }
+  },
+  "keywords": ["kommo", "crm", "leads", "sales", "pipelines", "amocrm"],
+  "license": "MIT",
+  "privacy_policies": ["https://github.com/depper-IA/kommo-kiro-power/blob/main/PRIVACY.md"]
+}

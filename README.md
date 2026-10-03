@@ -48,6 +48,8 @@ Published on [PyPI](https://pypi.org/project/kommo-kiro-power/) and the [officia
 uvx --from kommo-kiro-power kommo-mcp
 ```
 
+Or install the one-click [MCPB bundle](https://github.com/depper-IA/kommo-kiro-power/releases/latest) (`kommo-crm.mcpb`) in Claude Desktop or any MCPB-compatible client. Bundle sources live in `mcpb/`; rebuild with `pnpm dlx @anthropic-ai/mcpb pack mcpb kommo-crm.mcpb`.
+
 Or from source:
 
 ```bash

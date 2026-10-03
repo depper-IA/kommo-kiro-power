@@ -25,3 +25,6 @@ docs/
 # OS
 .DS_Store
 Thumbs.db
+
+# MCPB build output
+*.mcpb
