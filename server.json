@@ -1,0 +1,53 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.depper-IA/kommo-kiro-power",
+  "title": "Kommo CRM",
+  "description": "Manage Kommo CRM leads, contacts, pipelines, tasks, notes, tags and companies.",
+  "repository": {
+    "url": "https://github.com/depper-IA/kommo-kiro-power",
+    "source": "github"
+  },
+  "version": "1.0.2",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "kommo-kiro-power",
+      "version": "1.0.2",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "KOMMO_SUBDOMAIN",
+          "description": "Your Kommo account subdomain (the part before .kommo.com)",
+          "isRequired": true
+        },
+        {
+          "name": "KOMMO_ACCESS_TOKEN",
+          "description": "Kommo OAuth access token or long-lived token",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "KOMMO_REFRESH_TOKEN",
+          "description": "Kommo OAuth refresh token, used to renew the access token",
+          "isSecret": true
+        },
+        {
+          "name": "KOMMO_CLIENT_ID",
+          "description": "Kommo integration client ID, used to refresh tokens"
+        },
+        {
+          "name": "KOMMO_CLIENT_SECRET",
+          "description": "Kommo integration client secret, used to refresh tokens",
+          "isSecret": true
+        },
+        {
+          "name": "KOMMO_REDIRECT_URI",
+          "description": "OAuth redirect URI registered in the Kommo integration"
+        }
+      ]
+    }
+  ]
+}
