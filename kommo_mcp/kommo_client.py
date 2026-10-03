@@ -635,8 +635,11 @@ class KommoClient:
             payload["_embedded"] = payload.get("_embedded", {})
             payload["_embedded"]["companies"] = [{"name": company_name}]
 
+        # Kommo answers with a bare array: [{id, contact_id, company_id, request_id, merged}].
         data = await self.post("/leads/complex", json=[payload])
-        return data.get("_embedded", {}).get("leads", [{}])[0]
+        if isinstance(data, list) and data:
+            return data[0]
+        raise ValueError(f"Unexpected response from POST /leads/complex: {data!r}")
 
     # --- Chat ---
 
@@ -645,11 +648,13 @@ class KommoClient:
         return data.get("_embedded", {}).get("chat_templates", [])
 
     async def send_chat_message(self, lead_id: int, text: str) -> dict[str, Any]:
-        data = await self.get("/talks", params={"filter[lead_id]": lead_id, "limit": 1})
-        talks = data.get("_embedded", {}).get("talks", [])
-        if not talks:
-            raise ValueError(f"No active conversation for lead {lead_id}")
-        talk_id = talks[0]["id"]
-        return await self.post(
-            f"/talks/{talk_id}/messages", json=[{"text": text, "type": "outgoing"}]
+        data = await self.get(
+            "/talks",
+            params={"filter[entity_id][]": lead_id, "filter[entity_type]": "leads", "limit": 50},
         )
+        talks = data.get("_embedded", {}).get("talks", []) if isinstance(data, dict) else []
+        # Never trust the filter alone: only send to a talk that belongs to this lead.
+        talk = next((t for t in talks if t.get("entity_id") == lead_id), None)
+        if talk is None:
+            raise ValueError(f"No active conversation for lead {lead_id}")
+        return await self.post(f"/talks/{talk['talk_id']}/send_message", json={"text": text})

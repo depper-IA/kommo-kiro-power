@@ -135,7 +135,7 @@ FIELD = {
     "remind": None,
 }
 TEMPLATE = {"id": 701, "name": "Welcome", "content": "Hi!", "type": "whatsapp", "status": "approved"}
-TALK = {"id": 801, "talk_id": 801, "chat_id": "c1", "contact_id": 201, "entity_id": 101, "is_in_work": True}
+TALK = {"talk_id": 801, "chat_id": "c1", "contact_id": 201, "entity_id": 101, "entity_type": "lead", "is_in_work": True}
 
 
 def emb(key: str, items: list[dict[str, Any]], **extra: Any) -> dict[str, Any]:
@@ -174,7 +174,6 @@ def respond(method: str, endpoint: str, body: Any) -> Any:
     if method == "POST":
         created = {
             "/leads": ("leads", LEAD_MIN),
-            "/leads/complex": ("leads", {**LEAD_MIN, "contact_id": 201, "company_id": 301}),
             "/leads/tags": ("tags", TAG),
             "/contacts": ("contacts", {"id": 201, "name": "Jane Doe", "request_id": "0"}),
             "/companies": ("companies", {"id": 301, "name": "Acme Inc", "request_id": "0"}),
@@ -182,6 +181,8 @@ def respond(method: str, endpoint: str, body: Any) -> Any:
             "/leads/pipelines": ("pipelines", {"id": 9, "name": "Sales", "sort": 99}),
             "/leads/custom_fields": ("custom_fields", FIELD),
         }
+        if endpoint == "/leads/complex":
+            return [{"id": 101, "contact_id": 201, "company_id": 301, "request_id": ["0"], "merged": False}]
         if endpoint in created:
             key, item = created[endpoint]
             return emb(key, [item])
@@ -189,8 +190,8 @@ def respond(method: str, endpoint: str, body: Any) -> Any:
             return emb("notes", [NOTE])
         if endpoint.endswith("/statuses"):
             return emb("statuses", [STAGE])
-        if endpoint.endswith("/messages"):
-            return {"_total_items": 1, "_embedded": {"messages": [{"id": "m1", "text": "hi"}]}}
+        if endpoint.endswith("/send_message"):
+            return {"success": True}
     if method == "PATCH":
         if endpoint == "/leads":
             return emb("leads", [LEAD_MIN, {**LEAD_MIN, "id": 102}], _total_items=2)

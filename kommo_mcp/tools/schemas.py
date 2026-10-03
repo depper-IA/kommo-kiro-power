@@ -238,11 +238,19 @@ BULK_UPDATE = _obj(
     },
 )
 CHAT_MESSAGE = _obj(
-    "Kommo response for the posted chat message, passed through unchanged.",
+    "Kommo response to POST /talks/{talk_id}/send_message, passed through unchanged."
+)
+
+COMPLEX_LEAD = _obj(
+    "Result of POST /leads/complex for the created (or merged) lead.",
     {
-        "_total_items": _int("Number of messages created."),
-        "_embedded": _obj("Embedded messages."),
+        "id": _int("Lead ID."),
+        "contact_id": _int("ID of the created or linked contact.", nullable=True),
+        "company_id": _int("ID of the created or linked company.", nullable=True),
+        "request_id": _array("Request IDs sent for this lead.", _str("Request ID.")),
+        "merged": _bool("True when Kommo merged the lead into an existing duplicate."),
     },
+    required=("id",),
 )
 
 OUTPUT_SCHEMAS: dict[str, Schema] = {
@@ -253,9 +261,7 @@ OUTPUT_SCHEMAS: dict[str, Schema] = {
     "delete_lead": single(LEAD, "The lead marked as deleted, as returned by Kommo."),
     "move_lead_stage": single(LEAD, "The lead after the stage change."),
     "bulk_update_leads": BULK_UPDATE,
-    "create_lead_complex": single(
-        LEAD, "The created lead; may also carry contact_id and company_id."
-    ),
+    "create_lead_complex": COMPLEX_LEAD,
     "add_tag": single(LEAD, "The lead after the tag was added."),
     "remove_tag": single(LEAD, "The lead after the tag was removed (unchanged if absent)."),
     "list_tags": listing(TAG, "Tags, as {items: [tag, ...]}."),
