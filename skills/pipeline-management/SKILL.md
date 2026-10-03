@@ -1,3 +1,8 @@
+---
+name: pipeline-management
+description: Inspect and manage Kommo pipelines and stages
+---
+
 # Pipeline Management
 
 ## Understanding Kommo Pipelines

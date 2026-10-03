@@ -1,3 +1,8 @@
+---
+name: automation-patterns
+description: Automate repetitive Kommo CRM work: bulk lead intake, follow-up tasks, tagging and cleanup
+---
+
 # Automation Patterns
 
 ## Common CRM Automation Workflows

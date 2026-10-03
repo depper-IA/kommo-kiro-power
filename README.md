@@ -42,6 +42,14 @@ Connect AI agents to your **Kommo CRM** (formerly amoCRM) using the [Model Conte
 
 ### Install as standalone MCP
 
+Published on [PyPI](https://pypi.org/project/kommo-kiro-power/) and the [official MCP Registry](https://registry.modelcontextprotocol.io/v0/servers?search=kommo-kiro-power). With [uv](https://docs.astral.sh/uv/) installed, no clone is needed:
+
+```bash
+uvx --from kommo-kiro-power kommo-mcp
+```
+
+Or from source:
+
 ```bash
 git clone https://github.com/depper-IA/kommo-kiro-power.git
 cd kommo-kiro-power
@@ -98,8 +106,12 @@ Add to your `claude_desktop_config.json`, `opencode.json`, or equivalent:
 {
   "mcpServers": {
     "kommo": {
-      "command": "python",
-      "args": ["-m", "kommo_mcp"]
+      "command": "uvx",
+      "args": ["--from", "kommo-kiro-power", "kommo-mcp"],
+      "env": {
+        "KOMMO_SUBDOMAIN": "your_subdomain",
+        "KOMMO_ACCESS_TOKEN": "your_access_token"
+      }
     }
   }
 }
@@ -109,12 +121,14 @@ Add to your `claude_desktop_config.json`, `opencode.json`, or equivalent:
 
 ```
 kommo-kiro-power/
-├── POWER.md              # Kiro Power metadata + onboarding
+├── plugin.json           # Kiro Power manifest (Agent Plugins format)
+├── POWER.md              # Legacy Kiro Power metadata + onboarding
 ├── mcp.json              # MCP server config for Kiro
-├── steering/             # Workflow guides loaded on-demand
-│   ├── leads-workflow.md
-│   ├── pipeline-management.md
-│   └── automation-patterns.md
+├── server.json           # Official MCP Registry metadata
+├── skills/               # Workflow guides loaded on-demand
+│   ├── leads-workflow/SKILL.md
+│   ├── pipeline-management/SKILL.md
+│   └── automation-patterns/SKILL.md
 ├── kommo_mcp/            # Python MCP server
 │   ├── __main__.py       # Entry point (stdio transport)
 │   ├── mcp_server.py     # Server + tool registration
@@ -143,6 +157,15 @@ kommo-kiro-power/
 - **Python**: 3.10, 3.11, 3.12, 3.13
 - **MCP Clients**: Kiro, Claude Desktop, OpenCode, Cursor, Codex
 - **Kommo API**: v4
+
+## Privacy
+
+The server runs locally on your machine and talks only to your own Kommo account API. It has no telemetry and sends no data to the author or any third party. See [PRIVACY.md](PRIVACY.md).
+
+## Support
+
+- Bugs and feature requests: [GitHub Issues](https://github.com/depper-IA/kommo-kiro-power/issues)
+- Email: [sam@wilkiedevs.com](mailto:sam@wilkiedevs.com)
 
 ## License
 
