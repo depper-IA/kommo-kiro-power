@@ -28,3 +28,6 @@ Thumbs.db
 
 # MCPB build output
 *.mcpb
+
+# Local scratch images
+/images.png
