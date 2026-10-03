@@ -1,6 +1,6 @@
 ---
 name: pipeline-management
-description: Inspect and manage Kommo pipelines and stages
+description: "Inspect and manage Kommo pipelines and stages"
 ---
 
 # Pipeline Management
