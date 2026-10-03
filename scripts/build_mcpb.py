@@ -4,8 +4,8 @@
     python scripts/build_mcpb.py --smithery OUT     # also write a Smithery bundle
 
 The MCPB spec only allows `name` and `description` per tool, so the manifest in
-the repo stays spec-compliant. Smithery requires each tool's `inputSchema`, so
-the Smithery bundle adds it.
+the repo stays spec-compliant. Smithery requires each tool's `inputSchema` and
+scores `annotations`, so the Smithery bundle adds both.
 """
 
 from __future__ import annotations
@@ -27,10 +27,13 @@ def spec_tools() -> list[dict]:
 
 
 def smithery_tools() -> list[dict]:
-    return [
-        {"name": t.name, "description": t.description, "inputSchema": t.inputSchema}
-        for t in get_tool_definitions()
-    ]
+    tools = []
+    for t in get_tool_definitions():
+        entry = {"name": t.name, "description": t.description, "inputSchema": t.inputSchema}
+        if t.annotations is not None:
+            entry["annotations"] = t.annotations.model_dump(exclude_none=True)
+        tools.append(entry)
+    return tools
 
 
 def sync_manifest() -> dict:
